@@ -39,7 +39,7 @@ def get_number_start_and_end(line: List[str], i: int) -> (int, int):
     return start, end
 
 
-def main():
+def part1():
     part_numbers_sum = 0
     schematic = get_schematic()
     for i, line in enumerate(schematic):
@@ -60,4 +60,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    part1()
