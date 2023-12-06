@@ -18,7 +18,7 @@ def get_adjacent_by_condition(
             continue
 
         for y in range(j - 1, j + 2):
-            if x == i and j == i:
+            if x == i and y == j:
                 continue
             if y < 0 or y >= len(schematic[i]):
                 continue
