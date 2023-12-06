@@ -30,6 +30,15 @@ class Game:
                     return False
         return True
 
+    @property
+    def minimum_bag(self) -> Dict[Color, int]:
+        minimum_bag = {color: 0 for color in Color}
+        for cube_set in self.cube_sets:
+            for color, number in cube_set.items():
+                minimum_bag[color] = max(minimum_bag[color], number)
+
+        return minimum_bag
+
 
 def get_cube_set(set_string: str) -> Dict[Color, int]:
     cube_count_strings = set_string.split(", ")
@@ -66,5 +75,20 @@ def part1():
     print(f"The sum of the IDs of the possible games is {id_sum}")
 
 
+def part2():
+    power_sum = 0
+    with open(FILE_NAME) as f:
+        for line in f.readlines():
+            game = get_game(line)
+            power = 1
+            for cube_count in game.minimum_bag.values():
+                power *= cube_count
+
+            power_sum += power
+
+    print(f"The sum of the power sum of the cube sets is {power_sum}")
+
+
 if __name__ == "__main__":
     part1()
+    part2()
