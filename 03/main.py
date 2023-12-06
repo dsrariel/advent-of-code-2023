@@ -1,4 +1,4 @@
-from typing import List
+from typing import Callable, List, Tuple
 
 FILE_NAME = "input.txt"
 
@@ -8,7 +8,11 @@ def get_schematic() -> List[List[str]]:
         return [[char for char in line.rstrip()] for line in f.readlines()]
 
 
-def has_adjacent_symbol(schematic: List[List[str]], i: int, j: int) -> bool:
+def get_adjacent_by_condition(
+    schematic: List[List[str]], i: int, j: int, condition: Callable
+) -> List[Tuple[int, int]]:
+    neighbors = []
+
     for x in range(i - 1, i + 2):
         if x < 0 or x >= len(schematic):
             continue
@@ -19,11 +23,18 @@ def has_adjacent_symbol(schematic: List[List[str]], i: int, j: int) -> bool:
             if y < 0 or y >= len(schematic[i]):
                 continue
 
-            is_symbol = not schematic[x][y].isdigit() and schematic[x][y] != "."
-            if is_symbol:
-                return True
+            if condition(schematic[x][y]):
+                neighbors.append((x, y))
 
-    return False
+    return neighbors
+
+
+def is_symbol(c: str) -> bool:
+    return not c.isdigit() and c != "."
+
+
+def has_adjacent_symbol(schematic: List[List[str]], i: int, j: int) -> bool:
+    return bool(get_adjacent_by_condition(schematic, i, j, is_symbol))
 
 
 def get_number_start_and_end(line: List[str], i: int) -> (int, int):
