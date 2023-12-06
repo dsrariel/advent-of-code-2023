@@ -55,7 +55,7 @@ def get_game(line: str) -> Game:
     return Game(index, cube_sets)
 
 
-def main():
+def part1():
     id_sum = 0
     with open(FILE_NAME) as f:
         for line in f.readlines():
@@ -67,4 +67,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    part1()
