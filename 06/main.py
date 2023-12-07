@@ -62,7 +62,25 @@ def load_input() -> List[Race]:
     return [Race(t, d) for t, d in zip(times, distances)]
 
 
-def main():
+def load_input_as_part_2() -> Race:
+    time, distance = 0, 0
+    with open(FILE_NAME, encoding="utf-8") as f:
+        for line in f.readlines():
+            if line.startswith("Time:"):
+                time = int(line[len("Time: ") :].strip().replace(" ", ""))
+
+            if line.startswith("Distance:"):
+                distance = int(line[len("Distance: ") :].strip().replace(" ", ""))
+
+    return Race(time, distance)
+
+
+def part2():
+    race = load_input_as_part_2()
+    print(f"The ways to win are {race.count_ways_to_win()}.")
+
+
+def part1():
     races = load_input()
     ways_to_win_multiplication = 1
     for race in races:
@@ -74,4 +92,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    part1()
+    part2()
