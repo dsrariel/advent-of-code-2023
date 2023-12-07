@@ -1,47 +1,121 @@
 import unittest
 from collections import namedtuple
 
-from part1 import Card as Part1Card, Hand as Part1Hand, HandType
-from part2 import Card as Part2Card, Hand as Part2Hand
+from common import Hand, HandType
+from part1 import ClassicDeck, get_classic_hand_type
+from part2 import JokerDeck, get_joker_hand_type
 
 
-class Part1HandTestCase(unittest.TestCase):
+class HandTestCase(unittest.TestCase):
     def test_hand_type(self):
-        TestCase = namedtuple("TestCase", "hand hand_type")
+        TestCase = namedtuple("TestCase", "cards hand_type_function hand_type")
 
         test_cases = [
             TestCase(
-                Part1Hand([Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A]),
+                [ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A],
+                get_classic_hand_type,
                 HandType.FIVE_OF_A_KIND,
             ),
             TestCase(
-                Part1Hand([Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.K]),
+                [JokerDeck.A, JokerDeck.A, JokerDeck.A, JokerDeck.A, JokerDeck.A],
+                get_joker_hand_type,
+                HandType.FIVE_OF_A_KIND,
+            ),
+            TestCase(
+                [ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.K],
+                get_classic_hand_type,
                 HandType.FOUR_OF_A_KIND,
             ),
             TestCase(
-                Part1Hand([Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.K, Part1Card.K]),
+                [JokerDeck.A, JokerDeck.A, JokerDeck.A, JokerDeck.A, JokerDeck.K],
+                get_joker_hand_type,
+                HandType.FOUR_OF_A_KIND,
+            ),
+            TestCase(
+                [ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.K, ClassicDeck.K],
+                get_classic_hand_type,
                 HandType.FULL_HOUSE,
             ),
             TestCase(
-                Part1Hand([Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.Q, Part1Card.K]),
+                [JokerDeck.A, JokerDeck.A, JokerDeck.A, JokerDeck.K, JokerDeck.K],
+                get_joker_hand_type,
+                HandType.FULL_HOUSE,
+            ),
+            TestCase(
+                [ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.Q, ClassicDeck.K],
+                get_classic_hand_type,
                 HandType.THREE_OF_A_KIND,
             ),
             TestCase(
-                Part1Hand([Part1Card.A, Part1Card.A, Part1Card.Q, Part1Card.K, Part1Card.K]),
+                [JokerDeck.A, JokerDeck.A, JokerDeck.A, JokerDeck.Q, JokerDeck.K],
+                get_joker_hand_type,
+                HandType.THREE_OF_A_KIND,
+            ),
+            TestCase(
+                [ClassicDeck.A, ClassicDeck.A, ClassicDeck.Q, ClassicDeck.K, ClassicDeck.K],
+                get_classic_hand_type,
                 HandType.TWO_PAIRS,
             ),
             TestCase(
-                Part1Hand([Part1Card.A, Part1Card.A, Part1Card.Q, Part1Card.K, Part1Card.J]),
+                [JokerDeck.A, JokerDeck.A, JokerDeck.Q, JokerDeck.K, JokerDeck.K],
+                get_joker_hand_type,
+                HandType.TWO_PAIRS,
+            ),
+            TestCase(
+                [ClassicDeck.A, ClassicDeck.A, ClassicDeck.Q, ClassicDeck.K, ClassicDeck.J],
+                get_classic_hand_type,
                 HandType.ONE_PAIR,
             ),
             TestCase(
-                Part1Hand([Part1Card.A, Part1Card.T, Part1Card.Q, Part1Card.K, Part1Card.J]),
+                [JokerDeck.A, JokerDeck.A, JokerDeck.Q, JokerDeck.K, JokerDeck.T],
+                get_joker_hand_type,
+                HandType.ONE_PAIR,
+            ),
+            TestCase(
+                [ClassicDeck.A, ClassicDeck.T, ClassicDeck.Q, ClassicDeck.K, ClassicDeck.J],
+                get_classic_hand_type,
                 HandType.HIGH_CARD,
+            ),
+            TestCase(
+                [JokerDeck.A, JokerDeck.T, JokerDeck.Q, JokerDeck.K, JokerDeck.NINE],
+                get_joker_hand_type,
+                HandType.HIGH_CARD,
+            ),
+            TestCase(
+                [JokerDeck.A, JokerDeck.A, JokerDeck.A, JokerDeck.A, JokerDeck.J],
+                get_joker_hand_type,
+                HandType.FIVE_OF_A_KIND,
+            ),
+            TestCase(
+                [JokerDeck.A, JokerDeck.A, JokerDeck.A, JokerDeck.T, JokerDeck.J],
+                get_joker_hand_type,
+                HandType.FOUR_OF_A_KIND,
+            ),
+            TestCase(
+                [JokerDeck.A, JokerDeck.A, JokerDeck.T, JokerDeck.T, JokerDeck.J],
+                get_joker_hand_type,
+                HandType.FULL_HOUSE,
+            ),
+            TestCase(
+                [JokerDeck.A, JokerDeck.A, JokerDeck.T, JokerDeck.K, JokerDeck.J],
+                get_joker_hand_type,
+                HandType.THREE_OF_A_KIND,
+            ),
+            TestCase(
+                [JokerDeck.A, JokerDeck.K, JokerDeck.T, JokerDeck.Q, JokerDeck.J],
+                get_joker_hand_type,
+                HandType.ONE_PAIR,
+            ),
+            TestCase(
+                [JokerDeck.J, JokerDeck.J, JokerDeck.J, JokerDeck.J, JokerDeck.J],
+                get_joker_hand_type,
+                HandType.FIVE_OF_A_KIND,
             ),
         ]
 
         for tc in test_cases:
-            self.assertIs(tc.hand_type, tc.hand.hand_type)
+            with self.subTest(test_case=tc):
+                self.assertIs(tc.hand_type, Hand(tc.cards, tc.hand_type_function).hand_type)
 
     def test_lower_than(self):
         TestCase = namedtuple("TestCase", "description hand_a hand_b lower_than")
@@ -49,20 +123,38 @@ class Part1HandTestCase(unittest.TestCase):
         test_cases = [
             TestCase(
                 "high card against five of a kind",
-                Part1Hand([Part1Card.A, Part1Card.T, Part1Card.Q, Part1Card.K, Part1Card.J]),
-                Part1Hand([Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A]),
+                Hand(
+                    [ClassicDeck.A, ClassicDeck.T, ClassicDeck.Q, ClassicDeck.K, ClassicDeck.J],
+                    get_classic_hand_type,
+                ),
+                Hand(
+                    [ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A],
+                    get_classic_hand_type,
+                ),
                 True,
             ),
             TestCase(
                 "five of a kind against five of a kind of the same type",
-                Part1Hand([Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A]),
-                Part1Hand([Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A]),
+                Hand(
+                    [ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A],
+                    get_classic_hand_type,
+                ),
+                Hand(
+                    [ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A],
+                    get_classic_hand_type,
+                ),
                 False,
             ),
             TestCase(
                 "five of a kind of K against five of a kind of A",
-                Part1Hand([Part1Card.K, Part1Card.K, Part1Card.K, Part1Card.K, Part1Card.K]),
-                Part1Hand([Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A, Part1Card.A]),
+                Hand(
+                    [ClassicDeck.K, ClassicDeck.K, ClassicDeck.K, ClassicDeck.K, ClassicDeck.K],
+                    get_classic_hand_type,
+                ),
+                Hand(
+                    [ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A, ClassicDeck.A],
+                    get_classic_hand_type,
+                ),
                 True,
             ),
         ]
@@ -70,70 +162,3 @@ class Part1HandTestCase(unittest.TestCase):
         for tc in test_cases:
             with self.subTest(description=tc.description):
                 self.assertEqual(tc.lower_than, tc.hand_a < tc.hand_b)
-
-
-class Part2HandTestCase(unittest.TestCase):
-    def test_hand_type(self):
-        TestCase = namedtuple("TestCase", "hand hand_type")
-
-        test_cases = [
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.A, Part2Card.A, Part2Card.A, Part2Card.A]),
-                HandType.FIVE_OF_A_KIND,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.A, Part2Card.A, Part2Card.A, Part2Card.K]),
-                HandType.FOUR_OF_A_KIND,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.A, Part2Card.A, Part2Card.K, Part2Card.K]),
-                HandType.FULL_HOUSE,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.A, Part2Card.A, Part2Card.Q, Part2Card.K]),
-                HandType.THREE_OF_A_KIND,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.A, Part2Card.Q, Part2Card.K, Part2Card.K]),
-                HandType.TWO_PAIRS,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.A, Part2Card.Q, Part2Card.K, Part2Card.T]),
-                HandType.ONE_PAIR,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.T, Part2Card.Q, Part2Card.K, Part2Card.NINE]),
-                HandType.HIGH_CARD,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.A, Part2Card.A, Part2Card.A, Part2Card.J]),
-                HandType.FIVE_OF_A_KIND,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.A, Part2Card.A, Part2Card.T, Part2Card.J]),
-                HandType.FOUR_OF_A_KIND,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.A, Part2Card.T, Part2Card.T, Part2Card.J]),
-                HandType.FULL_HOUSE,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.A, Part2Card.T, Part2Card.K, Part2Card.J]),
-                HandType.THREE_OF_A_KIND,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.A, Part2Card.K, Part2Card.T, Part2Card.Q, Part2Card.J]),
-                HandType.ONE_PAIR,
-            ),
-            TestCase(
-                Part2Hand([Part2Card.J, Part2Card.J, Part2Card.J, Part2Card.J, Part2Card.J]),
-                HandType.FIVE_OF_A_KIND,
-            ),
-        ]
-
-        for tc in test_cases:
-            self.assertIs(tc.hand_type, tc.hand.hand_type)
-
-
-if __name__ == "__main__":
-    unittest.main()
