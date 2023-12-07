@@ -10,13 +10,13 @@ HandType = Enum(
 
 
 class Hand:
-    def __init__(self, cards: List[Enum], hand_type_function: callable):
+    def __init__(self, cards: List[Enum], deck_type: Enum):
         self.cards = cards
-        self.hand_type_function = hand_type_function
+        self.deck_type = deck_type
 
     @property
     def hand_type(self):
-        return self.hand_type_function(self)
+        return self.deck_type.get_hand_type(self.cards)
 
     def __lt__(self, other: "Hand"):
         if not self.hand_type is other.hand_type:
@@ -33,11 +33,11 @@ class Hand:
 Sequence = namedtuple("Sequence", "hand bid")
 
 
-def get_sequence(line: str, hand_type_func: callable, deck_type: Enum) -> Sequence:
+def get_sequence(line: str, deck_type: Enum) -> Sequence:
     cards_and_bid = line.split(" ")
     bid = int(cards_and_bid[1])
     cards = [get_card(c, deck_type) for c in cards_and_bid[0]]
-    return Sequence(Hand(cards, hand_type_func), bid)
+    return Sequence(Hand(cards, deck_type), bid)
 
 
 class Game:
