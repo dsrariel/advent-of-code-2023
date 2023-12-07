@@ -1,7 +1,7 @@
 import unittest
 from collections import namedtuple
 
-from main import Card, Hand, HandType
+from part1 import Card, Hand, HandType
 
 
 class HandTestCase(unittest.TestCase):
