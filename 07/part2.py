@@ -2,10 +2,13 @@ from collections import Counter, namedtuple
 from enum import Enum
 from typing import List
 
+from part1 import HandType, Sequence, Game
+
 FILE_NAME = "input.txt"
 
 
 class Card(Enum):
+    J = 1
     TWO = 2
     THREE = 3
     FOUR = 4
@@ -15,17 +18,9 @@ class Card(Enum):
     EIGHT = 8
     NINE = 9
     T = 10
-    J = 11
     Q = 12
     K = 13
     A = 14
-
-
-HandType = Enum(
-    "HandType",
-    "HIGH_CARD ONE_PAIR TWO_PAIRS THREE_OF_A_KIND FULL_HOUSE FOUR_OF_A_KIND FIVE_OF_A_KIND",
-)
-Sequence = namedtuple("Sequence", "hand bid")
 
 
 class Hand:
@@ -35,27 +30,33 @@ class Hand:
     @property
     def hand_type(self):
         counter = Counter(self.cards)
-        previous = None
-        for _, count in counter.most_common():
-            if count == 5:
-                return HandType.FIVE_OF_A_KIND
-            if count == 4:
-                return HandType.FOUR_OF_A_KIND
-            if count == 3:
-                previous = 3
-                continue
-            if count == 2 and previous == 3:
-                return HandType.FULL_HOUSE
-            if previous == 3:
-                return HandType.THREE_OF_A_KIND
-            if count == 2 and previous == 2:
-                return HandType.TWO_PAIRS
-            if count == 2:
-                previous = 2
-                continue
-            if previous == 2:
-                return HandType.ONE_PAIR
-            return HandType.HIGH_CARD
+        j_counts = counter[Card.J]
+        del counter[Card.J]
+
+        highest = counter.most_common(2)
+        if not highest:
+            return HandType.FIVE_OF_A_KIND
+
+        first_count = highest[0][1]
+        first_count += j_counts
+
+        if first_count == 5:
+            return HandType.FIVE_OF_A_KIND
+        if first_count == 4:
+            return HandType.FOUR_OF_A_KIND
+
+        second_count = highest[1][1]
+
+        if first_count == 3 and second_count == 2:
+            return HandType.FULL_HOUSE
+        if first_count == 3:
+            return HandType.THREE_OF_A_KIND
+        if first_count == 2 and second_count == 2:
+            return HandType.TWO_PAIRS
+        if first_count == 2:
+            return HandType.ONE_PAIR
+
+        return HandType.HIGH_CARD
 
     def __lt__(self, other: "Hand"):
         if not self.hand_type is other.hand_type:
@@ -67,17 +68,6 @@ class Hand:
             return self_card.value < other_card.value
 
         return False
-
-
-class Game:
-    def __init__(self, sequences: List[Sequence]):
-        self.sequences = sequences
-
-    @property
-    def winnings(self) -> int:
-        sequences = sorted(self.sequences, reverse=True)
-        ranks = len(sequences)
-        return sum([(ranks - i) * sequence.bid for i, sequence in enumerate(sequences)])
 
 
 def get_card(char: str) -> Card:
