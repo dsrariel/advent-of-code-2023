@@ -21,12 +21,6 @@ class History:
 
         return differences
 
-    def _right_extrapolate(self) -> None:
-        differences = self._calculate_differences()
-        for i in range(len(differences) - 1, 0, -1):
-            new_number = differences[i - 1][-1] + differences[i][-1]
-            differences[i - 1].append(new_number)
-
     def extrapolates_previous_value(self) -> int:
         differences = self._calculate_differences()
         previous = 0
@@ -36,8 +30,12 @@ class History:
         return previous
 
     def extrapolate_next_value(self) -> int:
-        self._right_extrapolate()
-        return self.numbers[-1]
+        differences = self._calculate_differences()
+        previous = 0
+        for i in range(len(differences) - 2, -1, -1):
+            previous = differences[i][-1] + previous
+
+        return previous
 
 
 def part2():
