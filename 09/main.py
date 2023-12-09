@@ -21,18 +21,18 @@ class History:
 
         return differences
 
-    def _extrapolate(self) -> None:
+    def _right_extrapolate(self) -> None:
         differences = self._calculate_differences()
         for i in range(len(differences) - 1, 0, -1):
             new_number = differences[i - 1][-1] + differences[i][-1]
             differences[i - 1].append(new_number)
 
     def extrapolate_next_value(self) -> int:
-        self._extrapolate()
+        self._right_extrapolate()
         return self.numbers[-1]
 
 
-def main():
+def part1():
     next_values = []
     with open(FILE_NAME, encoding="utf-8") as f:
         for line in f.readlines():
@@ -43,4 +43,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    part1()
