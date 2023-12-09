@@ -1,6 +1,6 @@
 from typing import List
 
-FILE_NAME = "input.txt"
+FILE_NAME = "example.txt"
 
 
 class History:
@@ -8,16 +8,20 @@ class History:
         self.numbers = numbers
 
     def _calculate_differences(self) -> List[List[int]]:
+        previous_series = self.numbers
         finished = False
-        differences = [self.numbers]
+        differences = [[self.numbers[0], self.numbers[-1]]]
         while not finished:
             finished = True
-            differences.append([])
-            for i in range(1, len(differences[-2])):
-                difference = differences[-2][i] - differences[-2][i - 1]
-                differences[-1].append(difference)
-                if difference != 0:
+            current_series = []
+            for i in range(1, len(previous_series)):
+                next_element = previous_series[i] - previous_series[i - 1]
+                current_series.append(next_element)
+                if next_element != 0:
                     finished = False
+
+            differences.append([current_series[0], current_series[-1]])
+            previous_series = current_series
 
         return differences
 
