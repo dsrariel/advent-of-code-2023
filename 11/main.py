@@ -2,6 +2,7 @@ from collections import OrderedDict
 from typing import Dict, List
 
 FILE_NAME = "input.txt"
+EXPANSION_FACTOR = 1
 
 
 def expand_vertically(columns: List[int], start: int, j: int) -> int:
@@ -27,7 +28,7 @@ def expand_vertically(columns: List[int], start: int, j: int) -> int:
         end = mid - 1
 
     for i in range(start, len(columns)):
-        columns[i] += 1
+        columns[i] += EXPANSION_FACTOR
 
     return start
 
@@ -52,7 +53,7 @@ def load_galaxies() -> Dict[int, List[int]]:
                 galaxies[galaxy_x].append(j)
 
             if galaxy_x not in galaxies:
-                galaxy_x += 1
+                galaxy_x += EXPANSION_FACTOR
             galaxy_x += 1
 
     for columns in galaxies.values():
@@ -61,7 +62,7 @@ def load_galaxies() -> Dict[int, List[int]]:
             if j in columns_with_galaxies:
                 continue
 
-            start = expand_vertically(columns, start, j + expansions)
+            start = expand_vertically(columns, start, j + expansions * EXPANSION_FACTOR)
             expansions += 1
 
     return galaxies
@@ -83,4 +84,6 @@ def main():
 
 
 if __name__ == "__main__":
+    main()
+    EXPANSION_FACTOR = 1_000_000 - 1
     main()
