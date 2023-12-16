@@ -80,11 +80,11 @@ def load_input() -> List[Row]:
     return condition_records
 
 
-def main():
+def part_one():
     condition_records = load_input()
     count = sum([get_possible_arrangements_count(r) for r in condition_records])
     print(f"The sum of possible arrangements is {count}.")
 
 
 if __name__ == "__main__":
-    main()
+    part_one()
