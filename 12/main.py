@@ -9,6 +9,9 @@ Row = namedtuple("Row", "arrangement damaged_groups unknown_springs")
 def is_possible_arrangement(row: Row) -> bool:
     i, group, group_size = 0, 0, 0
     while i < len(row.arrangement):
+        if row.arrangement[i] == "?":
+            return True
+
         if row.arrangement[i] == "#" and group >= len(row.damaged_groups):
             return False
 
@@ -35,8 +38,13 @@ def is_possible_arrangement(row: Row) -> bool:
 
 
 def get_possible_arrangements_count(row: Row) -> int:
+    is_possible = is_possible_arrangement(row)
+
     if not row.unknown_springs:
-        return int(is_possible_arrangement(row))
+        return int(is_possible)
+
+    if row.unknown_springs and not is_possible:
+        return 0
 
     count = 0
     next_unknown_spring = row.unknown_springs.popleft()
