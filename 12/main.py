@@ -7,23 +7,28 @@ Row = namedtuple("Row", "arrangement damaged_groups unknown_springs")
 
 
 def is_possible_arrangement(row: Row) -> bool:
-    i, group = 0, 0
+    i, group, group_size = 0, 0, 0
     while i < len(row.arrangement):
-        if row.arrangement[i] == ".":
-            i += 1
-            continue
-
-        if group >= len(row.damaged_groups):
+        if row.arrangement[i] == "#" and group >= len(row.damaged_groups):
             return False
 
-        count = 0
-        while i < len(row.arrangement) and row.arrangement[i] == "#":
-            count += 1
-            i += 1
+        if row.arrangement[i] == "#":
+            group_size += 1
 
-        if count != row.damaged_groups[group]:
-            return False
+        if row.arrangement[i] == "." and group_size != 0:
+            if group_size != row.damaged_groups[group]:
+                return False
 
+            group += 1
+            group_size = 0
+
+        i += 1
+
+    if (
+        i == len(row.arrangement)
+        and row.arrangement[i - 1] == "#"
+        and group_size == row.damaged_groups[group]
+    ):
         group += 1
 
     return group == len(row.damaged_groups)
