@@ -1,9 +1,16 @@
-from typing import List
-from collections import deque, namedtuple
+from collections import deque
+from dataclasses import dataclass
+from typing import Deque, List
 
 FILE_NAME = "example.txt"
 
-Row = namedtuple("Row", "arrangement damaged_groups unknown_springs")
+
+@dataclass
+class Row:
+    arrangement: List[str]
+    damaged_groups: List[int]
+    unknown_springs: Deque[int]
+    choices: str = ""
 
 
 def is_possible_arrangement(row: Row) -> bool:
@@ -46,12 +53,12 @@ def get_possible_arrangements_count(row: Row) -> int:
     if row.unknown_springs and not is_possible:
         return 0
 
-    count = 0
+    count, choices = 0, row.choices
     next_unknown_spring = row.unknown_springs.popleft()
-    row.arrangement[next_unknown_spring] = "."
-    count += get_possible_arrangements_count(row)
-    row.arrangement[next_unknown_spring] = "#"
-    count += get_possible_arrangements_count(row)
+    for c in [".", "#"]:
+        row.arrangement[next_unknown_spring] = c
+        row.choices = choices + c
+        count += get_possible_arrangements_count(row)
 
     row.arrangement[next_unknown_spring] = "?"
     row.unknown_springs.appendleft(next_unknown_spring)
