@@ -1,6 +1,6 @@
 from collections import deque
 from dataclasses import dataclass
-from typing import Deque, List
+from typing import Deque, Dict, List, Tuple
 
 FILE_NAME = "example.txt"
 
@@ -13,10 +13,12 @@ class Row:
     choices: str = ""
 
 
-def is_possible_arrangement(row: Row) -> bool:
-    i, group, group_size = 0, 0, 0
+def is_possible_arrangement(row: Row, cache: Dict[str, Tuple[int, int, int]]) -> bool:
+    previous_choices = row.choices[:-1] if row.choices else ""
+    i, group, group_size = cache.get(previous_choices, (0, 0, 0))
     while i < len(row.arrangement):
         if row.arrangement[i] == "?":
+            cache[row.choices] = (i, group, group_size)
             return True
 
         if row.arrangement[i] == "#" and group >= len(row.damaged_groups):
@@ -44,8 +46,8 @@ def is_possible_arrangement(row: Row) -> bool:
     return group == len(row.damaged_groups)
 
 
-def get_possible_arrangements_count(row: Row) -> int:
-    is_possible = is_possible_arrangement(row)
+def get_possible_arrangements_count(row: Row, cache: Dict[str, Tuple[int, int, int]]) -> int:
+    is_possible = is_possible_arrangement(row, cache)
 
     if not row.unknown_springs:
         return int(is_possible)
@@ -58,7 +60,7 @@ def get_possible_arrangements_count(row: Row) -> int:
     for c in [".", "#"]:
         row.arrangement[next_unknown_spring] = c
         row.choices = choices + c
-        count += get_possible_arrangements_count(row)
+        count += get_possible_arrangements_count(row, cache)
 
     row.arrangement[next_unknown_spring] = "?"
     row.unknown_springs.appendleft(next_unknown_spring)
@@ -105,14 +107,14 @@ def unfold_input(condition_records: List[Row]) -> List[Row]:
 
 def part_one():
     condition_records = load_input()
-    count = sum([get_possible_arrangements_count(r) for r in condition_records])
+    count = sum([get_possible_arrangements_count(r, dict()) for r in condition_records])
     print(f"The sum of possible arrangements is {count}.")
 
 
 def part_two():
     condition_records = load_input()
     condition_records = unfold_input(condition_records)
-    count = sum([get_possible_arrangements_count(r) for r in condition_records])
+    count = sum([get_possible_arrangements_count(r, dict()) for r in condition_records])
     print(f"The sum of possible arrangements is {count}.")
 
 
