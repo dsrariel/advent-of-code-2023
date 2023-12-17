@@ -1,7 +1,7 @@
 from typing import List
 from collections import deque, namedtuple
 
-FILE_NAME = "input.txt"
+FILE_NAME = "example.txt"
 
 Row = namedtuple("Row", "arrangement damaged_groups unknown_springs")
 
@@ -80,11 +80,35 @@ def load_input() -> List[Row]:
     return condition_records
 
 
+def unfold_input(condition_records: List[Row]) -> List[Row]:
+    rows = []
+    for row in condition_records:
+        new_row = Row(list(row.arrangement), list(row.damaged_groups), deque(row.unknown_springs))
+        for i in range(4):
+            new_row.arrangement.append("?")
+            new_row.arrangement.extend(row.arrangement)
+            new_row.damaged_groups.extend(row.damaged_groups)
+            shift = (len(row.arrangement) + 1) * (i + 1)
+            new_row.unknown_springs.append(shift - 1)
+            new_row.unknown_springs.extend([u + shift for u in row.unknown_springs])
+        rows.append(new_row)
+
+    return rows
+
+
 def part_one():
     condition_records = load_input()
     count = sum([get_possible_arrangements_count(r) for r in condition_records])
     print(f"The sum of possible arrangements is {count}.")
 
 
+def part_two():
+    condition_records = load_input()
+    condition_records = unfold_input(condition_records)
+    count = sum([get_possible_arrangements_count(r) for r in condition_records])
+    print(f"The sum of possible arrangements is {count}.")
+
+
 if __name__ == "__main__":
-    part_one()
+    # part_one()
+    part_two()
