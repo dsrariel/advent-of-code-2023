@@ -1,8 +1,10 @@
 from collections import deque
 from dataclasses import dataclass
-from typing import Deque, List
+from multiprocessing import Pool, cpu_count
+from typing import Deque, List, Optional
 
 FILE_NAME = "input.txt"
+POOL_SIZE = cpu_count() - 2
 
 
 @dataclass
@@ -53,7 +55,10 @@ def is_possible_arrangement(row: Row, state: State) -> bool:
     return state.group == len(row.damaged_groups)
 
 
-def get_possible_arrangements_count(row: Row, state: State) -> int:
+def get_possible_arrangements_count(row: Row, state: Optional[State] = None) -> int:
+    if state is None:
+        state = State()
+
     is_possible = is_possible_arrangement(row, state)
 
     if not row.unknown_springs:
@@ -126,14 +131,16 @@ def unfold_input(condition_records: List[Row]) -> List[Row]:
 
 def part_one():
     condition_records = load_input()
-    count = sum(get_possible_arrangements_count(r, State(0, 0, 0)) for r in condition_records)
+    with Pool(POOL_SIZE) as p:
+        count = sum(p.map(get_possible_arrangements_count, condition_records))
     print(f"The sum of possible arrangements is {count}.")
 
 
 def part_two():
     condition_records = load_input()
     condition_records = unfold_input(condition_records)
-    count = sum(get_possible_arrangements_count(r, State(0, 0, 0)) for r in condition_records)
+    with Pool(POOL_SIZE) as p:
+        count = sum(p.map(get_possible_arrangements_count, condition_records))
     print(f"The sum of possible arrangements is {count}.")
 
 
