@@ -1,6 +1,6 @@
 from collections import deque
 from dataclasses import dataclass
-from typing import Deque, Dict, List, Tuple
+from typing import Deque, List
 
 FILE_NAME = "example.txt"
 
@@ -10,44 +10,47 @@ class Row:
     arrangement: List[str]
     damaged_groups: List[int]
     unknown_springs: Deque[int]
-    choices: str = ""
 
 
-def is_possible_arrangement(row: Row, cache: Dict[str, Tuple[int, int, int]]) -> bool:
-    previous_choices = row.choices[:-1] if row.choices else ""
-    i, group, group_size = cache.get(previous_choices, (0, 0, 0))
-    while i < len(row.arrangement):
-        if row.arrangement[i] == "?":
-            cache[row.choices] = (i, group, group_size)
+@dataclass
+class State:
+    i: int = 0
+    group: int = 0
+    group_size: int = 0
+
+
+def is_possible_arrangement(row: Row, state: State) -> bool:
+    while state.i < len(row.arrangement):
+        if row.arrangement[state.i] == "?":
             return True
 
-        if row.arrangement[i] == "#" and group >= len(row.damaged_groups):
+        if row.arrangement[state.i] == "#" and state.group >= len(row.damaged_groups):
             return False
 
-        if row.arrangement[i] == "#":
-            group_size += 1
+        if row.arrangement[state.i] == "#":
+            state.group_size += 1
 
-        if row.arrangement[i] == "." and group_size != 0:
-            if group_size != row.damaged_groups[group]:
+        if row.arrangement[state.i] == "." and state.group_size != 0:
+            if state.group_size != row.damaged_groups[state.group]:
                 return False
 
-            group += 1
-            group_size = 0
+            state.group += 1
+            state.group_size = 0
 
-        i += 1
+        state.i += 1
 
     if (
-        i == len(row.arrangement)
-        and row.arrangement[i - 1] == "#"
-        and group_size == row.damaged_groups[group]
+        state.i == len(row.arrangement)
+        and row.arrangement[state.i - 1] == "#"
+        and state.group_size == row.damaged_groups[state.group]
     ):
-        group += 1
+        state.group += 1
 
-    return group == len(row.damaged_groups)
+    return state.group == len(row.damaged_groups)
 
 
-def get_possible_arrangements_count(row: Row, cache: Dict[str, Tuple[int, int, int]]) -> int:
-    is_possible = is_possible_arrangement(row, cache)
+def get_possible_arrangements_count(row: Row, state: State) -> int:
+    is_possible = is_possible_arrangement(row, state)
 
     if not row.unknown_springs:
         return int(is_possible)
@@ -55,12 +58,11 @@ def get_possible_arrangements_count(row: Row, cache: Dict[str, Tuple[int, int, i
     if row.unknown_springs and not is_possible:
         return 0
 
-    count, choices = 0, row.choices
+    count = 0
     next_unknown_spring = row.unknown_springs.popleft()
     for c in [".", "#"]:
         row.arrangement[next_unknown_spring] = c
-        row.choices = choices + c
-        count += get_possible_arrangements_count(row, cache)
+        count += get_possible_arrangements_count(row, State(state.i, state.group, state.group_size))
 
     row.arrangement[next_unknown_spring] = "?"
     row.unknown_springs.appendleft(next_unknown_spring)
@@ -107,17 +109,17 @@ def unfold_input(condition_records: List[Row]) -> List[Row]:
 
 def part_one():
     condition_records = load_input()
-    count = sum([get_possible_arrangements_count(r, dict()) for r in condition_records])
+    count = sum([get_possible_arrangements_count(r, State(0, 0, 0)) for r in condition_records])
     print(f"The sum of possible arrangements is {count}.")
 
 
 def part_two():
     condition_records = load_input()
     condition_records = unfold_input(condition_records)
-    count = sum([get_possible_arrangements_count(r, dict()) for r in condition_records])
+    count = sum([get_possible_arrangements_count(r, State(0, 0, 0)) for r in condition_records])
     print(f"The sum of possible arrangements is {count}.")
 
 
 if __name__ == "__main__":
-    # part_one()
+    part_one()
     part_two()
