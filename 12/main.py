@@ -9,11 +9,9 @@ POOL_SIZE = cpu_count() - 2
 Row = namedtuple("Row", "arrangement damaged_groups")
 
 
-def get_possible_arrangements_count(
-    row: Row, cache: defaultdict[str, Dict[str, int]], i=0, group_size=0
-) -> int:
+def get_possible_arrangements_count(row: Row, cache: defaultdict[str, Dict[str, int]]) -> int:
     arrangement = "".join(row.arrangement)
-    groups = "".join(map(str, row.damaged_groups))
+    groups = ",".join(map(str, row.damaged_groups))
 
     if cache.get(arrangement, {}).get(groups, None) is not None:
         return cache[arrangement][groups]
@@ -22,23 +20,22 @@ def get_possible_arrangements_count(
         cache[arrangement][groups] = int(not any(a == "#" for a in row.arrangement))
         return cache[arrangement][groups]
 
-    while i < len(row.arrangement):
-        if row.arrangement[i] == "?":
-            a = Row(row.arrangement[i:], row.damaged_groups)
-            b = Row(row.arrangement[i:], row.damaged_groups)
-            a.arrangement[0], b.arrangement[0] = "#", "."
+    group_size = 0
+    for i, c in enumerate(row.arrangement):
+        if c == "?":
+            a = Row(list(row.arrangement), row.damaged_groups)
+            b = Row(list(row.arrangement), row.damaged_groups)
+            a.arrangement[i], b.arrangement[i] = "#", "."
             cache[arrangement][groups] = get_possible_arrangements_count(
-                a, cache, 0, group_size
-            ) + get_possible_arrangements_count(b, cache, 0, group_size)
+                a, cache
+            ) + get_possible_arrangements_count(b, cache)
             return cache[arrangement][groups]
 
-        if row.arrangement[i] == "#":
+        if c == "#":
             group_size += 1
-            i += 1
             continue
 
         if group_size == 0:
-            i += 1
             continue
 
         if group_size == row.damaged_groups[0]:
@@ -102,4 +99,4 @@ def part_two():
 
 if __name__ == "__main__":
     part_one()
-    part_two()
+    # part_two()
