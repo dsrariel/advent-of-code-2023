@@ -18,9 +18,7 @@ def get_possible_arrangements_count(
         return cache[arrangement][groups]
 
     while i < len(row.arrangement):
-        c = row.arrangement[i]
-
-        if c == "?":
+        if row.arrangement[i] == "?":
             a = Row(row.arrangement[i:], row.damaged_groups)
             b = Row(row.arrangement[i:], row.damaged_groups)
             a.arrangement[0], b.arrangement[0] = "#", "."
@@ -29,7 +27,7 @@ def get_possible_arrangements_count(
             ) + get_possible_arrangements_count(b, cache, 0, group_size)
             return cache[arrangement][groups]
 
-        if c == "#":
+        if row.arrangement[i] == "#":
             group_size += 1
             i += 1
             continue
