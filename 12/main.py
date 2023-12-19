@@ -1,5 +1,6 @@
+from collections import defaultdict
 from dataclasses import dataclass
-from typing import List
+from typing import Dict, List
 
 FILE_NAME = "example.txt"
 
@@ -10,9 +11,13 @@ class Row:
     damaged_groups: List[int]
 
 
-def get_possible_arrangements_count(row: Row) -> int:
+def get_possible_arrangements_count(row: Row, cache: defaultdict[str, Dict[str, int]]) -> int:
+    arrangement = "".join(row.arrangement)
+    numbers = "".join(map(str, row.damaged_groups))
+
     if not row.damaged_groups:
-        return int(not any(a == "#" for a in row.arrangement))
+        cache[arrangement][numbers] = int(not any(a == "#" for a in row.arrangement))
+        return cache[arrangement][numbers]
 
     group_size = 0
     for i, c in enumerate(row.arrangement):
@@ -20,7 +25,10 @@ def get_possible_arrangements_count(row: Row) -> int:
             a = Row(list(row.arrangement), row.damaged_groups)
             b = Row(list(row.arrangement), row.damaged_groups)
             a.arrangement[i], b.arrangement[i] = "#", "."
-            return get_possible_arrangements_count(a) + get_possible_arrangements_count(b)
+            cache[arrangement][numbers] = get_possible_arrangements_count(
+                a, cache
+            ) + get_possible_arrangements_count(b, cache)
+            return cache[arrangement][numbers]
 
         if c == "#":
             group_size += 1
@@ -30,11 +38,18 @@ def get_possible_arrangements_count(row: Row) -> int:
             continue
 
         if group_size == row.damaged_groups[0]:
-            return get_possible_arrangements_count(Row(row.arrangement[i:], row.damaged_groups[1:]))
+            cache[arrangement][numbers] = get_possible_arrangements_count(
+                Row(row.arrangement[i:], row.damaged_groups[1:]), cache
+            )
+            return cache[arrangement][numbers]
 
-        return 0
+        cache[arrangement][numbers] = 0
+        return cache[arrangement][numbers]
 
-    return int(len(row.damaged_groups) == 1 and group_size == row.damaged_groups[0])
+    cache[arrangement][numbers] = int(
+        len(row.damaged_groups) == 1 and group_size == row.damaged_groups[0]
+    )
+    return cache[arrangement][numbers]
 
 
 def load_input() -> List[Row]:
@@ -57,24 +72,24 @@ def unfold_input(condition_records: List[Row]) -> List[Row]:
             new_arrangement.extend("?")
             new_arrangement.extend(row.arrangement)
             new_damaged_groups.extend(row.damaged_groups)
-        rows.append(new_arrangement, new_damaged_groups)
+        rows.append(Row(new_arrangement, new_damaged_groups))
 
     return rows
 
 
 def part_one():
     condition_records = load_input()
-    count = sum(get_possible_arrangements_count(r) for r in condition_records)
+    count = sum(get_possible_arrangements_count(r, defaultdict(dict)) for r in condition_records)
     print(f"The sum of possible arrangements is {count}.")
 
 
 def part_two():
     condition_records = load_input()
     condition_records = unfold_input(condition_records)
-    count = sum(get_possible_arrangements_count(r) for r in condition_records)
+    count = sum(get_possible_arrangements_count(r, defaultdict(dict)) for r in condition_records)
     print(f"The sum of possible arrangements is {count}.")
 
 
 if __name__ == "__main__":
     part_one()
-    # part_two()
+    part_two()
