@@ -1,14 +1,10 @@
-from collections import defaultdict
-from dataclasses import dataclass
+from collections import defaultdict, namedtuple
 from typing import Dict, List
 
 FILE_NAME = "example.txt"
 
 
-@dataclass
-class Row:
-    arrangement: List[str]
-    damaged_groups: List[int]
+Row = namedtuple("Row", "arrangement damaged_groups")
 
 
 def get_possible_arrangements_count(row: Row, cache: defaultdict[str, Dict[str, int]]) -> int:
