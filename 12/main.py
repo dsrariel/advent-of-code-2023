@@ -3,7 +3,7 @@ from itertools import repeat
 from multiprocessing import Pool, cpu_count
 from typing import Dict, List
 
-FILE_NAME = "example.txt"
+FILE_NAME = "input.txt"
 POOL_SIZE = cpu_count() - 2
 
 Row = namedtuple("Row", "arrangement damaged_groups")
@@ -99,4 +99,4 @@ def part_two():
 
 if __name__ == "__main__":
     part_one()
-    # part_two()
+    part_two()
