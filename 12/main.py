@@ -1,8 +1,10 @@
 from collections import defaultdict, namedtuple
+from itertools import repeat
+from multiprocessing import Pool, cpu_count
 from typing import Dict, List
 
 FILE_NAME = "example.txt"
-
+POOL_SIZE = cpu_count() - 2
 
 Row = namedtuple("Row", "arrangement damaged_groups")
 
@@ -86,7 +88,12 @@ def part_one():
 def part_two():
     condition_records = load_input()
     condition_records = unfold_input(condition_records)
-    count = sum(get_possible_arrangements_count(r, defaultdict(dict)) for r in condition_records)
+    with Pool(POOL_SIZE) as p:
+        count = sum(
+            p.starmap(
+                get_possible_arrangements_count, zip(condition_records, repeat(defaultdict(dict)))
+            )
+        )
     print(f"The sum of possible arrangements is {count}.")
 
 
