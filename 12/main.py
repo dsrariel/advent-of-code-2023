@@ -7,45 +7,51 @@ FILE_NAME = "example.txt"
 Row = namedtuple("Row", "arrangement damaged_groups")
 
 
-def get_possible_arrangements_count(row: Row, cache: defaultdict[str, Dict[str, int]]) -> int:
+def get_possible_arrangements_count(
+    row: Row, cache: defaultdict[str, Dict[str, int]], i=0, group_size=0
+) -> int:
     arrangement = "".join(row.arrangement)
-    numbers = "".join(map(str, row.damaged_groups))
+    groups = "".join(map(str, row.damaged_groups))
 
     if not row.damaged_groups:
-        cache[arrangement][numbers] = int(not any(a == "#" for a in row.arrangement))
-        return cache[arrangement][numbers]
+        cache[arrangement][groups] = int(not any(a == "#" for a in row.arrangement))
+        return cache[arrangement][groups]
 
-    group_size = 0
-    for i, c in enumerate(row.arrangement):
+    while i < len(row.arrangement):
+        c = row.arrangement[i]
+
         if c == "?":
-            a = Row(list(row.arrangement), row.damaged_groups)
-            b = Row(list(row.arrangement), row.damaged_groups)
-            a.arrangement[i], b.arrangement[i] = "#", "."
-            cache[arrangement][numbers] = get_possible_arrangements_count(
-                a, cache
-            ) + get_possible_arrangements_count(b, cache)
-            return cache[arrangement][numbers]
+            a = Row(row.arrangement[i:], row.damaged_groups)
+            b = Row(row.arrangement[i:], row.damaged_groups)
+            a.arrangement[0], b.arrangement[0] = "#", "."
+            cache[arrangement][groups] = get_possible_arrangements_count(
+                a, cache, 0, group_size
+            ) + get_possible_arrangements_count(b, cache, 0, group_size)
+            return cache[arrangement][groups]
 
         if c == "#":
             group_size += 1
+            i += 1
             continue
 
         if group_size == 0:
+            i += 1
             continue
 
         if group_size == row.damaged_groups[0]:
-            cache[arrangement][numbers] = get_possible_arrangements_count(
-                Row(row.arrangement[i:], row.damaged_groups[1:]), cache
+            cache[arrangement][groups] = get_possible_arrangements_count(
+                Row(row.arrangement[i:], row.damaged_groups[1:]),
+                cache,
             )
-            return cache[arrangement][numbers]
+            return cache[arrangement][groups]
 
-        cache[arrangement][numbers] = 0
-        return cache[arrangement][numbers]
+        cache[arrangement][groups] = 0
+        return cache[arrangement][groups]
 
-    cache[arrangement][numbers] = int(
+    cache[arrangement][groups] = int(
         len(row.damaged_groups) == 1 and group_size == row.damaged_groups[0]
     )
-    return cache[arrangement][numbers]
+    return cache[arrangement][groups]
 
 
 def load_input() -> List[Row]:
