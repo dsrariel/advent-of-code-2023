@@ -2,7 +2,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Deque, List
 
-FILE_NAME = "input.txt"
+FILE_NAME = "example.txt"
 
 
 @dataclass
@@ -10,7 +10,6 @@ class Row:
     arrangement: List[str]
     damaged_groups: List[int]
     unknown_springs: Deque[int]
-    expected_damaged_count: int
 
 
 @dataclass
@@ -21,9 +20,6 @@ class State:
 
 
 def is_possible_arrangement(row: Row, state: State) -> bool:
-    if row.expected_damaged_count < 0 or len(row.unknown_springs) < row.expected_damaged_count:
-        return False
-
     while state.i < len(row.arrangement):
         if row.arrangement[state.i] == "?":
             return True
@@ -64,15 +60,10 @@ def get_possible_arrangements_count(row: Row, state: State) -> int:
 
     count = 0
     next_unknown_spring = row.unknown_springs.popleft()
+    for c in [".", "#"]:
+        row.arrangement[next_unknown_spring] = c
+        count += get_possible_arrangements_count(row, State(state.i, state.group, state.group_size))
 
-    row.arrangement[next_unknown_spring] = "."
-    count += get_possible_arrangements_count(row, State(state.i, state.group, state.group_size))
-
-    row.arrangement[next_unknown_spring] = "#"
-    row.expected_damaged_count -= 1
-    count += get_possible_arrangements_count(row, State(state.i, state.group, state.group_size))
-
-    row.expected_damaged_count += 1
     row.arrangement[next_unknown_spring] = "?"
     row.unknown_springs.appendleft(next_unknown_spring)
 
@@ -86,17 +77,14 @@ def load_input() -> List[Row]:
         for line in f.readlines():
             arrangement_string, damaged_groups_string = line.split(" ", 1)
 
-            arrangement, unknown_springs, damaged_count = [], deque(), 0
+            arrangement, unknown_springs = [], deque()
             for i, a in enumerate(arrangement_string):
                 arrangement.append(a)
                 if a == "?":
                     unknown_springs.append(i)
-                if a == "#":
-                    damaged_count += 1
 
-            damaged_groups = [int(g) for g in damaged_groups_string.split(",")]
             row = Row(
-                arrangement, damaged_groups, unknown_springs, sum(damaged_groups) - damaged_count
+                arrangement, [int(g) for g in damaged_groups_string.split(",")], unknown_springs
             )
             condition_records.append(row)
 
@@ -106,12 +94,7 @@ def load_input() -> List[Row]:
 def unfold_input(condition_records: List[Row]) -> List[Row]:
     rows = []
     for row in condition_records:
-        new_row = Row(
-            list(row.arrangement),
-            list(row.damaged_groups),
-            deque(row.unknown_springs),
-            5 * row.expected_damaged_count,
-        )
+        new_row = Row(list(row.arrangement), list(row.damaged_groups), deque(row.unknown_springs))
         for i in range(4):
             new_row.arrangement.append("?")
             new_row.arrangement.extend(row.arrangement)
@@ -126,14 +109,14 @@ def unfold_input(condition_records: List[Row]) -> List[Row]:
 
 def part_one():
     condition_records = load_input()
-    count = sum(get_possible_arrangements_count(r, State(0, 0, 0)) for r in condition_records)
+    count = sum([get_possible_arrangements_count(r, State(0, 0, 0)) for r in condition_records])
     print(f"The sum of possible arrangements is {count}.")
 
 
 def part_two():
     condition_records = load_input()
     condition_records = unfold_input(condition_records)
-    count = sum(get_possible_arrangements_count(r, State(0, 0, 0)) for r in condition_records)
+    count = sum([get_possible_arrangements_count(r, State(0, 0, 0)) for r in condition_records])
     print(f"The sum of possible arrangements is {count}.")
 
 
