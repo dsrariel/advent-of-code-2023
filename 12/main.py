@@ -15,6 +15,9 @@ def get_possible_arrangements_count(
     arrangement = "".join(row.arrangement)
     groups = "".join(map(str, row.damaged_groups))
 
+    if cache.get(arrangement, {}).get(groups, None) is not None:
+        return cache[arrangement][groups]
+
     if not row.damaged_groups:
         cache[arrangement][groups] = int(not any(a == "#" for a in row.arrangement))
         return cache[arrangement][groups]
