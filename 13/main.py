@@ -40,6 +40,19 @@ def are_all_the_lines_symmetric(mountain: list[list[int]], j: int) -> bool:
     return True
 
 
+def there_is_only_one_smudge(mountain: list[list[int]], j: int) -> bool:
+    smudge = False
+    offset = get_minimum_distance_from_edge(mountain, j)
+    for line in mountain:
+        for i in range(offset):
+            if line[j - 1 - i] != line[j + i]:
+                if smudge:
+                    return False
+                smudge = True
+
+    return smudge
+
+
 def transpose_mountain(mountain: list[list[int]]) -> list[list[int]]:
     x, y = len(mountain), len(mountain[0])
     transposed_mountain = [[0] * x for _ in range(y)]
@@ -73,5 +86,12 @@ def part_one():
     print(f"The sum of the mirrors across the valley is {mirrors_sum}.")
 
 
+def part_two():
+    valley = load_input()
+    mirrors_sum = sum(find_mirror_sum(m, there_is_only_one_smudge) for m in valley)
+    print(f"The sum of the mirrors across the valley is {mirrors_sum}.")
+
+
 if __name__ == "__main__":
     part_one()
+    part_two()
