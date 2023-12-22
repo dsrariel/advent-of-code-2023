@@ -1,3 +1,6 @@
+from typing import Callable
+
+
 FILE_NAME = "input.txt"
 
 
@@ -47,11 +50,11 @@ def transpose_mountain(mountain: list[list[int]]) -> list[list[int]]:
     return transposed_mountain
 
 
-def find_mirror_sum(mountain: list[list[int]]):
+def find_mirror_sum(mountain: list[list[int]], criteria: Callable):
     def find_vertical_mirror_sum(mountain: list[list[int]]) -> int:
         y = len(mountain[0])
         for j in range(1, y):
-            if are_all_the_lines_symmetric(mountain, j):
+            if criteria(mountain, j):
                 return j
 
         return -1
@@ -66,7 +69,7 @@ def find_mirror_sum(mountain: list[list[int]]):
 
 def part_one():
     valley = load_input()
-    mirrors_sum = sum(find_mirror_sum(m) for m in valley)
+    mirrors_sum = sum(find_mirror_sum(m, are_all_the_lines_symmetric) for m in valley)
     print(f"The sum of the mirrors across the valley is {mirrors_sum}.")
 
 
