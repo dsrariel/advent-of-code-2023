@@ -88,17 +88,41 @@ def load_input() -> list[str]:
         return [line.rstrip() for line in f.readlines()]
 
 
-def part_one():
-    grid = load_input()
-    beams = deque([Beam((0, 0))])
+def get_energized_tiles(grid: list[str], start_beam: Beam) -> int:
+    Beam.VISITED_TILES = defaultdict(set)
+    beams = deque([start_beam])
     while beams:
         beam = beams.popleft()
         next_beams = beam.move(grid)
         for beam in next_beams:
             beams.appendleft(beam)
 
-    print(f"The number of energized tiles is {len(Beam.VISITED_TILES)}.")
+    return len(Beam.VISITED_TILES)
+
+
+def part_one():
+    grid = load_input()
+    start = Beam((0, 0))
+    print(f"The number of energized tiles is {get_energized_tiles(grid, start)}.")
+
+
+def part_two():
+    grid = load_input()
+    x, y = len(grid), len(grid[0])
+    max_energized_tiles = 0
+    for i, direction in [(0, Direction.DOWN), (x - 1, Direction.UP)]:
+        for j in range(y):
+            beam = Beam((i, j), direction)
+            max_energized_tiles = max(max_energized_tiles, get_energized_tiles(grid, beam))
+
+    for i in range(x):
+        for j, direction in [(0, Direction.RIGHT), (y - 1, Direction.LEFT)]:
+            beam = Beam((i, j), direction)
+            max_energized_tiles = max(max_energized_tiles, get_energized_tiles(grid, beam))
+
+    print(f"The number of energized tiles is {max_energized_tiles}.")
 
 
 if __name__ == "__main__":
     part_one()
+    part_two()
