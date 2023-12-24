@@ -1,3 +1,5 @@
+from collections import defaultdict, deque
+from copy import deepcopy
 from dataclasses import dataclass
 from operator import lt, gt
 from typing import Callable
@@ -79,5 +81,108 @@ def part_one():
     print(f"The accepted rating sum is {accepted_rating_sum}.")
 
 
+def get_destination_to_sources_counts(workflows: dict[str, list[Rule]]) -> dict[dict[int]]:
+    destination_to_sources_counts = defaultdict(dict)
+    for workflow, rules in workflows.items():
+        for rule in rules:
+            destination_to_sources_counts[rule.output][workflow] = (
+                destination_to_sources_counts[rule.output].get(workflow, 0) + 1
+            )
+
+    return destination_to_sources_counts
+
+
+def get_acceptance_paths(destination_to_sources_counts: dict[dict[int]]) -> list[list[str]]:
+    acceptance_paths = []
+    incomplete_paths = deque([["A"]])
+    while incomplete_paths:
+        incomplete_path = incomplete_paths.popleft()
+        last_node_sources = destination_to_sources_counts[incomplete_path[-1]].keys()
+        for source in last_node_sources:
+            new_path = incomplete_path + [source]
+            if source == "in":
+                acceptance_paths.append(new_path)
+            else:
+                incomplete_paths.append(new_path)
+
+    return acceptance_paths
+
+
+def merge_boundary(boundary: dict[str, list[int]], rule: Rule, union=True):
+    if rule.category == "d":
+        return
+
+    threshold = rule.threshold
+    if not union:
+        threshold += 1 if rule.operator is gt else -1
+
+    if rule.operator is lt and union or rule.operator is gt and not union:
+        boundary[rule.category][1] = min(threshold, boundary[rule.category][1])
+        return
+
+    boundary[rule.category][0] = max(threshold, boundary[rule.category][0])
+
+
+def get_acceptance_path_boundaries(
+    workflows: dict[str, list[Rule]],
+    destination_to_sources_counts: dict[dict[int]],
+    acceptance_path: list[str],
+) -> list[dict]:
+    boundaries = []
+    boundary = {c: [0, 4_001] for c in "xmas"}
+    for i in range(len(acceptance_path) - 1, 0, -1):
+        source, destination = acceptance_path[i], acceptance_path[i - 1]
+        for rule in workflows[source]:
+            if destination != "A":
+                merge_boundary(boundary, rule, rule.output == destination)
+                if rule.output == destination:
+                    break
+                continue
+
+            if rule.output == "A":
+                boundary_copy = deepcopy(boundary)
+                merge_boundary(boundary_copy, rule, True)
+                boundaries.append(boundary_copy)
+
+            # The only destinations that appear more than once in the same source are A and R.
+            is_last_boundary = len(boundaries) == destination_to_sources_counts["A"][source]
+            if is_last_boundary:
+                break
+
+            merge_boundary(boundary, rule, False)
+
+    return boundaries
+
+
+def count_possibilities(boundaries: list[dict]) -> int:
+    possibilities_sum = 0
+    for boundary in boundaries:
+        possibilities = 1
+        for limits in boundary.values():
+            possibilities *= limits[1] - limits[0] - 1
+        possibilities_sum += possibilities
+
+    return possibilities_sum
+
+
+def part_two():
+    workflows, _ = load_input()
+    destination_to_sources_counts = get_destination_to_sources_counts(workflows)
+    acceptance_paths = get_acceptance_paths(destination_to_sources_counts)
+
+    accepted_boundaries = []
+    for acceptance_path in acceptance_paths:
+        accepted_boundaries.extend(
+            get_acceptance_path_boundaries(
+                workflows, destination_to_sources_counts, acceptance_path
+            )
+        )
+
+    possibilities_count = count_possibilities(accepted_boundaries)
+
+    print(f"The number of accepted combinations of the Elves' workflows is {possibilities_count}.")
+
+
 if __name__ == "__main__":
     part_one()
+    part_two()
